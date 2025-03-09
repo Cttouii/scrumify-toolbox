@@ -5,7 +5,11 @@ import { useProjects } from "@/context/ProjectContext";
 import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
-const NewProjectButton: React.FC = () => {
+interface NewProjectButtonProps {
+  size?: "default" | "large";
+}
+
+const NewProjectButton: React.FC<NewProjectButtonProps> = ({ size = "default" }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -44,9 +48,9 @@ const NewProjectButton: React.FC = () => {
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="scrum-button flex items-center gap-2"
+        className={`scrum-button flex items-center gap-2 ${size === "large" ? "px-6 py-3 text-lg" : ""}`}
       >
-        <Plus className="h-4 w-4" />
+        <Plus className={`${size === "large" ? "h-5 w-5" : "h-4 w-4"}`} />
         <span>New Project</span>
       </button>
 

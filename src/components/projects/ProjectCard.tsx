@@ -6,9 +6,10 @@ import { Project } from "@/types";
 
 interface ProjectCardProps {
   project: Project;
+  onClick?: () => void;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const navigate = useNavigate();
   
   const formattedDate = project.createdAt
@@ -32,7 +33,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       <div className="flex items-center justify-between mt-4">
         <span className="text-xs text-scrum-text-secondary">{formattedDate}</span>
         <button
-          onClick={() => navigate(`/projects/${project.id}`)}
+          onClick={onClick || (() => navigate(`/projects/${project.id}`))}
           className="scrum-button"
         >
           Open Project
