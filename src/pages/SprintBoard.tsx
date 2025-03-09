@@ -138,7 +138,7 @@ const SprintBoard: React.FC = () => {
             task => task.id !== draggableId && task.status !== "done"
           );
           
-          if (remainingTasks.length === 0 && sprint?.status === "in-progress") {
+          if (remainingTasks.length === 0 && sprint && sprint.status === "in-progress") {
             if (window.confirm("All tasks are completed! Would you like to mark this sprint as completed?")) {
               await updateSprint(sprint.id, { status: "completed" });
               toast.success("Sprint marked as completed!");
@@ -570,4 +570,3 @@ const NewTaskForm: React.FC<{
 };
 
 export default SprintBoard;
-
