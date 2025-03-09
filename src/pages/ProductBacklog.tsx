@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjects } from "@/context/ProjectContext";
@@ -27,7 +26,6 @@ const ProductBacklog: React.FC = () => {
   const availableSprints = getSprintsByProject(projectId || "")
     .filter(s => s.status !== "completed");
     
-  // Filter backlog tasks (those with no sprintId or with "backlog" as sprintId)
   useEffect(() => {
     const backlogItems = tasks.filter(t => 
       t.sprintId === "backlog" || 

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjects } from "@/context/ProjectContext";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Plus, Edit, Trash, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash, AlertCircle, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "@/components/tasks/TaskCard";
 import EditTaskModal from "@/components/tasks/EditTaskModal";
@@ -251,39 +251,49 @@ const SprintBoard: React.FC = () => {
   
   return (
     <div className="container mx-auto pb-20 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="mb-8 pt-8">
+        <button
+          onClick={() => navigate(`/projects/${sprint.projectId}`)}
+          className="flex items-center gap-2 text-scrum-text-secondary hover:text-white transition-colors mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Project</span>
+        </button>
+        
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold">{sprint.title}</h2>
+              {sprint.status === "completed" && (
+                <span className="bg-success text-white text-xs px-2 py-1 rounded-full">
+                  Completed
+                </span>
+              )}
+            </div>
+            <p className="text-scrum-text-secondary">{sprint.description}</p>
+          </div>
+          
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold">{sprint.title}</h2>
-            {sprint.status === "completed" && (
-              <span className="bg-success text-white text-xs px-2 py-1 rounded-full">
-                Completed
-              </span>
+            {sprint.status !== "completed" && (
+              <>
+                <button
+                  onClick={() => navigate(`/projects/${sprint.projectId}/sprint/${sprint.id}/edit`)}
+                  className="scrum-button-secondary flex items-center gap-1"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span>Edit Sprint</span>
+                </button>
+                
+                <button
+                  onClick={handleCompleteSprint}
+                  className={`scrum-button ${allTasksCompleted ? "bg-success hover:bg-success/90" : ""}`}
+                  disabled={sprint.status === "completed"}
+                >
+                  Complete Sprint
+                </button>
+              </>
             )}
           </div>
-          <p className="text-scrum-text-secondary">{sprint.description}</p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {sprint.status !== "completed" && (
-            <>
-              <button
-                onClick={() => navigate(`/projects/${sprint.projectId}/sprint/${sprint.id}/edit`)}
-                className="scrum-button-secondary flex items-center gap-1"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit Sprint</span>
-              </button>
-              
-              <button
-                onClick={handleCompleteSprint}
-                className={`scrum-button ${allTasksCompleted ? "bg-success hover:bg-success/90" : ""}`}
-                disabled={sprint.status === "completed"}
-              >
-                Complete Sprint
-              </button>
-            </>
-          )}
         </div>
       </div>
       
