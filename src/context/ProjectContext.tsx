@@ -393,25 +393,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!user) throw new Error('User not authenticated');
 
     try {
-      if (task.sprintId === "backlog" && task.status === "backlog") {
-        const newTaskId = generateId();
-        
-        const newTask: Task = {
-          id: newTaskId,
-          title: task.title,
-          description: task.description,
-          sprintId: "backlog",
-          status: "backlog",
-          assignedTo: task.assignedTo,
-          storyPoints: task.storyPoints,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-
-        setTasks(prev => [...prev, newTask]);
-        return newTask;
-      }
-      
       const sprint = getSprint(task.sprintId);
       if (!sprint) throw new Error('Sprint not found');
 
@@ -439,7 +420,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
         title: data.title,
         description: data.description,
         sprintId: data.sprint_id,
-        status: data.status as 'todo' | 'in-progress' | 'review' | 'done' | 'backlog',
+        status: data.status as 'todo' | 'in-progress' | 'review' | 'done',
         assignedTo: data.assign_to,
         storyPoints: data.story_points,
         createdAt: data.created_at,
@@ -469,59 +450,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       const existingTask = tasks.find(t => t.id === id);
       if (!existingTask) throw new Error('Task not found');
-
-      if (existingTask.sprintId === "backlog" && task.sprintId && task.sprintId !== "backlog") {
-        const sprint = getSprint(task.sprintId);
-        if (!sprint) throw new Error('Sprint not found');
-        
-        const { data, error } = await supabase
-          .from('tasks')
-          .insert([{
-            title: task.title || existingTask.title,
-            description: task.description || existingTask.description,
-            status: task.status || "todo",
-            assign_to: task.assignedTo || existingTask.assignedTo,
-            story_points: task.storyPoints || existingTask.storyPoints,
-            sprint_id: task.sprintId,
-            project_id: sprint.projectId,
-            user_id: user.id
-          }])
-          .select()
-          .single();
-
-        if (error) throw error;
-        
-        if (!data) throw new Error('Failed to create task in sprint');
-        
-        setTasks(prev => prev.filter(t => t.id !== id));
-        
-        const newTask: Task = {
-          id: data.id,
-          title: data.title,
-          description: data.description,
-          sprintId: data.sprint_id,
-          status: data.status as 'todo' | 'in-progress' | 'review' | 'done' | 'backlog',
-          assignedTo: data.assign_to,
-          storyPoints: data.story_points,
-          createdAt: data.created_at,
-          updatedAt: data.created_at
-        };
-        
-        setTasks(prev => [...prev, newTask]);
-        
-        return newTask;
-      }
-      
-      if (existingTask.sprintId === "backlog") {
-        const updatedTask = {
-          ...existingTask,
-          ...task,
-          updatedAt: new Date().toISOString(),
-        };
-
-        setTasks(prev => prev.map(t => t.id === id ? updatedTask : t));
-        return updatedTask;
-      }
 
       const { error } = await supabase
         .from('tasks')
@@ -574,11 +502,6 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       const taskToDelete = tasks.find(t => t.id === id);
       if (!taskToDelete) throw new Error('Task not found');
-
-      if (taskToDelete.sprintId === "backlog") {
-        setTasks(prev => prev.filter(t => t.id !== id));
-        return;
-      }
 
       const { error } = await supabase
         .from('tasks')

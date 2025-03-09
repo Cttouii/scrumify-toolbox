@@ -19,7 +19,6 @@ import SprintBoard from "./pages/SprintBoard";
 import EditSprint from "./pages/EditSprint";
 import ProjectTimeline from "./pages/ProjectTimeline";
 import NotFound from "./pages/NotFound";
-import ProductBacklog from "./pages/ProductBacklog";
 
 const queryClient = new QueryClient();
 
@@ -82,7 +81,7 @@ const App = () => (
               {/* Project routes */}
               <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectLayout /></ProtectedRoute>}>
                 <Route index element={<ProjectDetail />} />
-                <Route path="backlog" element={<ProductBacklog />} />
+                <Route path="backlog" element={<div>Product Backlog (Coming Soon)</div>} />
                 <Route path="timeline" element={<ProjectTimeline />} />
                 <Route path="burndown" element={<BurndownChart />} />
               </Route>
