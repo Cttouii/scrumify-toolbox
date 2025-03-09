@@ -27,11 +27,10 @@ const ProductBacklog: React.FC = () => {
   const availableSprints = getSprintsByProject(projectId || "")
     .filter(s => s.status !== "completed");
     
-  // Filter backlog tasks (those with no sprintId or with "backlog" as sprintId)
+  // Filter backlog tasks (those with status "backlog")
   useEffect(() => {
     const backlogItems = tasks.filter(t => 
-      t.sprintId === "backlog" || 
-      (t.sprintId === projectId && t.status === "backlog")
+      t.status === "backlog" && t.sprintId === "backlog"
     );
     setBacklogTasks(backlogItems);
   }, [tasks, projectId]);
