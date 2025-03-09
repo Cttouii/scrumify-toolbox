@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import TaskCard from "@/components/tasks/TaskCard";
 import EditTaskModal from "@/components/tasks/EditTaskModal";
 import AddColumnModal from "@/components/sprints/AddColumnModal";
+import { Sprint } from "@/types";
 
 const SprintBoard: React.FC = () => {
   const { sprintId } = useParams<{ sprintId: string }>();
@@ -138,6 +139,7 @@ const SprintBoard: React.FC = () => {
             task => task.id !== draggableId && task.status !== "done"
           );
           
+          // Fix the type comparison issue by ensuring sprint exists and comparing string literals correctly
           if (remainingTasks.length === 0 && sprint && sprint.status === "in-progress") {
             if (window.confirm("All tasks are completed! Would you like to mark this sprint as completed?")) {
               await updateSprint(sprint.id, { status: "completed" });
