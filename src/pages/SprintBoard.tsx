@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjects } from "@/context/ProjectContext";
@@ -288,7 +289,6 @@ const SprintBoard: React.FC = () => {
                 <button
                   onClick={handleCompleteSprint}
                   className={`scrum-button ${allTasksCompleted ? "bg-success hover:bg-success/90" : ""}`}
-                  disabled={sprint.status === "completed"}
                 >
                   Complete Sprint
                 </button>
