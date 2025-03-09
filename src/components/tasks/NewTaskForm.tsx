@@ -1,19 +1,22 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useProjects } from "@/context/ProjectContext";
 import { X } from "lucide-react";
 import { toast } from "sonner";
+import { Task } from "@/types";
 
 interface NewTaskFormProps {
   sprintId: string;
   initialStatus: string;
   onClose: () => void;
+  editTask?: Task | null;
 }
 
 const NewTaskForm: React.FC<NewTaskFormProps> = ({ 
   sprintId, 
   initialStatus, 
-  onClose 
+  onClose,
+  editTask = null
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -21,7 +24,17 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({
   const [assignedTo, setAssignedTo] = useState("");
   const [storyPoints, setStoryPoints] = useState<number | "">("");
   
-  const { addTask } = useProjects();
+  const { addTask, updateTask } = useProjects();
+  
+  useEffect(() => {
+    if (editTask) {
+      setTitle(editTask.title);
+      setDescription(editTask.description || "");
+      setPriority(editTask.priority || "");
+      setAssignedTo(editTask.assignedTo || "");
+      setStoryPoints(editTask.storyPoints || "");
+    }
+  }, [editTask]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,28 +45,43 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({
     }
     
     try {
-      await addTask({
-        title,
-        description,
-        sprintId,
-        status: initialStatus as any,
-        assignedTo: assignedTo || undefined,
-        priority: priority || undefined,
-        storyPoints: typeof storyPoints === 'number' ? storyPoints : undefined
-      });
+      if (editTask) {
+        await updateTask(editTask.id, {
+          title,
+          description,
+          sprintId,
+          status: initialStatus as any,
+          assignedTo: assignedTo || undefined,
+          priority: priority || undefined,
+          storyPoints: typeof storyPoints === 'number' ? storyPoints : undefined
+        });
+        
+        toast.success("Task updated successfully");
+      } else {
+        await addTask({
+          title,
+          description,
+          sprintId,
+          status: initialStatus as any,
+          assignedTo: assignedTo || undefined,
+          priority: priority || undefined,
+          storyPoints: typeof storyPoints === 'number' ? storyPoints : undefined
+        });
+        
+        toast.success("Task created successfully");
+      }
       
-      toast.success("Task created successfully");
       onClose();
     } catch (error) {
-      console.error("Error creating task:", error);
-      toast.error("Failed to create task");
+      console.error("Error with task:", error);
+      toast.error(editTask ? "Failed to update task" : "Failed to create task");
     }
   };
   
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Create New Task</h2>
+        <h2 className="text-xl font-bold">{editTask ? "Edit Task" : "Create New Task"}</h2>
         <button
           onClick={onClose}
           className="text-scrum-text-secondary hover:text-white"
@@ -152,7 +180,7 @@ const NewTaskForm: React.FC<NewTaskFormProps> = ({
             type="submit"
             className="scrum-button"
           >
-            Create Task
+            {editTask ? "Update Task" : "Create Task"}
           </button>
         </div>
       </form>
