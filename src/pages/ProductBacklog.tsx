@@ -32,10 +32,10 @@ const ProductBacklog: React.FC = () => {
     if (!projectId) return;
     
     const backlogItems = tasks.filter(t => 
-      t.sprintId === "backlog" && projectId === project?.id
+      t.sprintId === "backlog" && t.projectId === projectId
     );
     setBacklogTasks(backlogItems);
-  }, [tasks, projectId, project]);
+  }, [tasks, projectId]);
   
   if (!project) {
     return (
@@ -251,7 +251,8 @@ const BacklogTaskForm: React.FC<{
         title,
         description,
         sprintId: "backlog", // Using "backlog" to indicate it's a backlog item
-        status: "todo",
+        projectId: projectId, // Add the projectId here
+        status: "backlog", // Changed from "todo" to "backlog"
         assignedTo: assignedTo || undefined,
         priority: priority || undefined,
         storyPoints: typeof storyPoints === 'number' ? storyPoints : undefined
