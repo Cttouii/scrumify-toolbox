@@ -5,6 +5,7 @@ import { useProjects } from "@/context/ProjectContext";
 import { Plus, AlignJustify, Edit, Trash, MoveRight } from "lucide-react";
 import { toast } from "sonner";
 import { Task } from "@/types";
+import TaskCard from "@/components/tasks/TaskCard";
 
 const ProductBacklog: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -27,11 +28,13 @@ const ProductBacklog: React.FC = () => {
   const availableSprints = getSprintsByProject(projectId || "")
     .filter(s => s.status !== "completed");
     
-  // Filter backlog tasks (those with no sprintId or with "backlog" as sprintId)
+  // Filter backlog tasks (those with sprintId="backlog")
   useEffect(() => {
+    if (!projectId) return;
+    
     const backlogItems = tasks.filter(t => 
       t.sprintId === "backlog" || 
-      (t.sprintId === projectId && t.status === "backlog")
+      (t.status === "backlog" && t.sprintId === projectId)
     );
     setBacklogTasks(backlogItems);
   }, [tasks, projectId]);
@@ -54,7 +57,7 @@ const ProductBacklog: React.FC = () => {
     try {
       await updateTask(taskId, {
         sprintId,
-        status: "todo" // Always move to TODO column
+        status: "todo" // When moved to a sprint, it becomes a todo item
       });
       
       toast.success("Task moved to sprint");
@@ -151,7 +154,7 @@ const ProductBacklog: React.FC = () => {
                     </button>
                     
                     <button
-                      onClick={() => setMovingTaskId(task.id)}
+                      onClick={() => setMovingTaskId(task.id === movingTaskId ? null : task.id)}
                       className="text-scrum-text-secondary hover:text-blue-400 transition-colors p-1"
                       title="Move to sprint"
                       disabled={availableSprints.length === 0}
