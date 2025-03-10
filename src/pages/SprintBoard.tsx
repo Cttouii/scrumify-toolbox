@@ -8,6 +8,7 @@ import TaskCard from "@/components/tasks/TaskCard";
 import EditTaskModal from "@/components/tasks/EditTaskModal";
 import AddColumnModal from "@/components/sprints/AddColumnModal";
 import { formatDateRange } from "@/utils/dateUtils";
+import { SprintHeaderProps } from "@/types/components";
 
 const SprintBoard: React.FC = () => {
   const { sprintId } = useParams<{ sprintId: string }>();
