@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjects } from "@/context/ProjectContext";
-import { Plus, AlignJustify, Edit, Trash, MoveRight } from "lucide-react";
+import { AlignJustify, Plus, Edit, Trash, MoveRight } from "lucide-react";
 import { toast } from "sonner";
 import { Task } from "@/types";
 
@@ -27,24 +27,25 @@ const ProductBacklog: React.FC = () => {
   const availableSprints = getSprintsByProject(projectId || "")
     .filter(s => s.status !== "completed");
     
-  // Filter backlog tasks (those with no sprintId or with "backlog" as sprintId)
+  // Filter backlog tasks (those with sprintId === "backlog")
   useEffect(() => {
+    if (!projectId) return;
+    
     const backlogItems = tasks.filter(t => 
-      t.sprintId === "backlog" || 
-      (t.sprintId === projectId && t.status === "backlog")
+      t.sprintId === "backlog" && projectId === project?.id
     );
     setBacklogTasks(backlogItems);
-  }, [tasks, projectId]);
+  }, [tasks, projectId, project]);
   
   if (!project) {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-bold mb-4">Project not found</h2>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/projects")}
           className="scrum-button"
         >
-          Go Back
+          Go to Projects
         </button>
       </div>
     );
@@ -250,7 +251,7 @@ const BacklogTaskForm: React.FC<{
         title,
         description,
         sprintId: "backlog", // Using "backlog" to indicate it's a backlog item
-        status: "backlog",
+        status: "todo",
         assignedTo: assignedTo || undefined,
         priority: priority || undefined,
         storyPoints: typeof storyPoints === 'number' ? storyPoints : undefined

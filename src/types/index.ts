@@ -28,8 +28,8 @@ export interface Task {
   id: string;
   title: string;
   description?: string;
-  sprintId: string;
-  status: 'todo' | 'in-progress' | 'review' | 'done';
+  sprintId: string; // can be a real sprint ID or "backlog" for backlog tasks
+  status: 'todo' | 'in-progress' | 'review' | 'done' | 'backlog';
   assignedTo?: string;
   priority?: 'low' | 'medium' | 'high';
   storyPoints?: number;

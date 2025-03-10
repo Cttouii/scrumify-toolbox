@@ -65,10 +65,7 @@ const SprintBoard: React.FC = () => {
       if (initialColumns[task.status]) {
         initialColumns[task.status].taskIds.push(task.id);
       } else {
-        initialColumns[task.status] = {
-          title: task.status.toUpperCase().replace(/-/g, ' '),
-          taskIds: [task.id]
-        };
+        initialColumns["todo"].taskIds.push(task.id);
       }
     });
     
@@ -303,7 +300,7 @@ const SprintBoard: React.FC = () => {
       </div>
       
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 pb-4 overflow-x-auto">
+        <div className="flex gap-4 pb-4 overflow-x-auto">
           {columnOrder.map((columnId) => {
             const column = columns[columnId];
             
@@ -314,7 +311,7 @@ const SprintBoard: React.FC = () => {
             ).filter(Boolean);
             
             return (
-              <div key={columnId} className="min-w-[270px]">
+              <div key={columnId} className="min-w-[270px] max-w-[270px] flex-shrink-0">
                 <div className="bg-scrum-card border border-scrum-border rounded-md h-full flex flex-col">
                   <div className="flex items-center justify-between p-3 border-b border-scrum-border">
                     <h4 className="font-medium text-sm">{column.title}</h4>
