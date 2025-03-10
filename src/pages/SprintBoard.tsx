@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjects } from "@/context/ProjectContext";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Plus, Edit, Trash, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash, AlertCircle, Play, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "@/components/tasks/TaskCard";
 import EditTaskModal from "@/components/tasks/EditTaskModal";
 import AddColumnModal from "@/components/sprints/AddColumnModal";
+import { formatDateRange } from "@/utils/dateUtils";
 
 const SprintBoard: React.FC = () => {
   const { sprintId } = useParams<{ sprintId: string }>();
@@ -32,10 +32,8 @@ const SprintBoard: React.FC = () => {
   useEffect(() => {
     if (!sprint) return;
     
-    // Initialize columns
     const initialColumns: {[key: string]: {title: string, taskIds: string[]}} = {};
     
-    // Ensure default columns exist
     ["todo", "in-progress", "done"].forEach(colId => {
       initialColumns[colId] = {
         title: colId === "todo" ? "TO DO" : 
@@ -45,7 +43,6 @@ const SprintBoard: React.FC = () => {
       };
     });
     
-    // Add any custom columns from tasks
     const customStatuses = new Set<string>();
     tasks.forEach(task => {
       if (!["todo", "in-progress", "done"].includes(task.status)) {
@@ -60,7 +57,6 @@ const SprintBoard: React.FC = () => {
       };
     });
     
-    // Group tasks by status
     tasks.forEach(task => {
       if (initialColumns[task.status]) {
         initialColumns[task.status].taskIds.push(task.id);
@@ -72,7 +68,6 @@ const SprintBoard: React.FC = () => {
       }
     });
     
-    // Update column order to include all columns
     const newColumnOrder = [...columnOrder];
     Object.keys(initialColumns).forEach(colId => {
       if (!newColumnOrder.includes(colId)) {
@@ -87,10 +82,8 @@ const SprintBoard: React.FC = () => {
   const handleDragEnd = async (result: any) => {
     const { destination, source, draggableId } = result;
     
-    // Dropped outside a droppable area
     if (!destination) return;
     
-    // Dropped in the same position
     if (
       destination.droppableId === source.droppableId && 
       destination.index === source.index
@@ -98,11 +91,9 @@ const SprintBoard: React.FC = () => {
       return;
     }
     
-    // Get source and destination column
     const sourceColumn = columns[source.droppableId];
     const destColumn = columns[destination.droppableId];
     
-    // Moving within the same column
     if (source.droppableId === destination.droppableId) {
       const newTaskIds = Array.from(sourceColumn.taskIds);
       newTaskIds.splice(source.index, 1);
@@ -118,13 +109,10 @@ const SprintBoard: React.FC = () => {
         [source.droppableId]: newColumn,
       });
     } 
-    // Moving to a different column
     else {
-      // Remove from source column
       const sourceTaskIds = Array.from(sourceColumn.taskIds);
       sourceTaskIds.splice(source.index, 1);
       
-      // Add to destination column
       const destTaskIds = Array.from(destColumn.taskIds);
       destTaskIds.splice(destination.index, 0, draggableId);
       
@@ -140,20 +128,17 @@ const SprintBoard: React.FC = () => {
         },
       });
       
-      // Update task status in database
       try {
         await updateTask(draggableId, {
           status: destination.droppableId
         });
         
-        // Check if all tasks are in DONE column
         if (destination.droppableId === "done") {
           const allTasks = tasks;
           const remainingTasks = allTasks.filter(
             task => task.id !== draggableId && task.status !== "done"
           );
           
-          // If all tasks are now done, prompt to complete the sprint
           if (remainingTasks.length === 0 && sprint?.status === "in-progress") {
             if (window.confirm("All tasks are completed! Would you like to mark this sprint as completed?")) {
               await updateSprint(sprint.id, { status: "completed" });
@@ -173,7 +158,6 @@ const SprintBoard: React.FC = () => {
     
     const columnId = columnName.toLowerCase().replace(/\s+/g, '-');
     
-    // Check if column already exists
     if (columns[columnId]) {
       toast.error("A column with this name already exists");
       return;
@@ -193,13 +177,11 @@ const SprintBoard: React.FC = () => {
   };
   
   const handleRemoveColumn = (columnId: string) => {
-    // Cannot remove default columns
     if (["todo", "in-progress", "done"].includes(columnId)) {
       toast.error("Cannot remove default columns");
       return;
     }
     
-    // Check if column has tasks
     if (columns[columnId]?.taskIds.length > 0) {
       toast.error("Cannot remove a column that contains tasks");
       return;
@@ -251,41 +233,7 @@ const SprintBoard: React.FC = () => {
   
   return (
     <div className="container mx-auto pb-20 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold">{sprint.title}</h2>
-            {sprint.status === "completed" && (
-              <span className="bg-success text-white text-xs px-2 py-1 rounded-full">
-                Completed
-              </span>
-            )}
-          </div>
-          <p className="text-scrum-text-secondary">{sprint.description}</p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {sprint.status !== "completed" && (
-            <>
-              <button
-                onClick={() => navigate(`/projects/${sprint.projectId}/sprint/${sprint.id}/edit`)}
-                className="scrum-button-secondary flex items-center gap-1"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit Sprint</span>
-              </button>
-              
-              <button
-                onClick={handleCompleteSprint}
-                className={`scrum-button ${allTasksCompleted ? "bg-success hover:bg-success/90" : ""}`}
-                disabled={sprint.status === "completed"}
-              >
-                Complete Sprint
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      <SprintHeader sprint={sprint} onStartSprint={() => navigate(`/projects/${sprint.projectId}/sprint/${sprint.id}/edit`)} onCompleteSprint={handleCompleteSprint} />
       
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium">Sprint Board</h3>
@@ -420,7 +368,41 @@ const SprintBoard: React.FC = () => {
   );
 };
 
-// Separate component for creating new tasks
+const SprintHeader: React.FC<SprintHeaderProps> = ({ sprint, onStartSprint, onCompleteSprint }) => {
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-scrum-border">
+      <div>
+        <h1 className="font-bold text-xl">{sprint.title}</h1>
+        <div className="text-sm text-scrum-text-secondary">
+          {formatDateRange(sprint.startDate, sprint.endDate)}
+        </div>
+      </div>
+      
+      <div>
+        {sprint.status === "planned" && (
+          <button
+            onClick={onStartSprint}
+            className="scrum-button flex items-center gap-1"
+          >
+            <Play className="h-4 w-4" />
+            <span>Start Sprint</span>
+          </button>
+        )}
+        
+        {sprint.status === "in-progress" && (
+          <button
+            onClick={onCompleteSprint}
+            className="scrum-button-success flex items-center gap-1"
+          >
+            <CheckCircle className="h-4 w-4" />
+            <span>Complete Sprint</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const NewTaskForm: React.FC<{
   sprintId: string;
   initialStatus: string;
