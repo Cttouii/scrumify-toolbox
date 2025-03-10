@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProjects } from "@/context/ProjectContext";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Plus, Edit, Trash, AlertCircle } from "lucide-react";
+import { Plus, Edit, Trash, Play, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "@/components/tasks/TaskCard";
 import EditTaskModal from "@/components/tasks/EditTaskModal";
@@ -248,41 +248,11 @@ const SprintBoard: React.FC = () => {
   
   return (
     <div className="container mx-auto pb-20 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold">{sprint.title}</h2>
-            {sprint.status === "completed" && (
-              <span className="bg-success text-white text-xs px-2 py-1 rounded-full">
-                Completed
-              </span>
-            )}
-          </div>
-          <p className="text-scrum-text-secondary">{sprint.description}</p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {sprint.status !== "completed" && (
-            <>
-              <button
-                onClick={() => navigate(`/projects/${sprint.projectId}/sprint/${sprint.id}/edit`)}
-                className="scrum-button-secondary flex items-center gap-1"
-              >
-                <Edit className="h-4 w-4" />
-                <span>Edit Sprint</span>
-              </button>
-              
-              <button
-                onClick={handleCompleteSprint}
-                className={`scrum-button ${allTasksCompleted ? "bg-success hover:bg-success/90" : ""}`}
-                disabled={sprint.status === "completed"}
-              >
-                Complete Sprint
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      <SprintHeader 
+        sprint={sprint}
+        onStartSprint={() => navigate(`/projects/${sprint.projectId}/sprint/${sprint.id}/edit`)}
+        onCompleteSprint={handleCompleteSprint}
+      />
       
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium">Sprint Board</h3>
@@ -413,6 +383,68 @@ const SprintBoard: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// SprintHeader component for displaying sprint information and actions
+interface SprintHeaderProps {
+  sprint: {
+    id: string;
+    title: string;
+    description: string;
+    projectId: string;
+    startDate: string;
+    endDate: string;
+    status: 'planned' | 'in-progress' | 'completed';
+  };
+  onStartSprint: () => void;
+  onCompleteSprint: () => void;
+}
+
+const SprintHeader: React.FC<SprintHeaderProps> = ({ 
+  sprint, 
+  onStartSprint, 
+  onCompleteSprint 
+}) => {
+  // Format dates for display
+  const formatDateRange = (start: string, end: string) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+  };
+  
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-scrum-border">
+      <div>
+        <h1 className="font-bold text-xl">{sprint.title}</h1>
+        <div className="text-sm text-scrum-text-secondary">
+          {formatDateRange(sprint.startDate, sprint.endDate)}
+        </div>
+      </div>
+      
+      <div>
+        {sprint.status === "planned" && (
+          <button
+            onClick={onStartSprint}
+            className="scrum-button flex items-center gap-1"
+          >
+            <Play className="h-4 w-4" />
+            <span>Start Sprint</span>
+          </button>
+        )}
+        
+        {sprint.status === "in-progress" && (
+          <button
+            onClick={onCompleteSprint}
+            className="scrum-button-success flex items-center gap-1"
+          >
+            <CheckCircle className="h-4 w-4" />
+            <span>Complete Sprint</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 };
