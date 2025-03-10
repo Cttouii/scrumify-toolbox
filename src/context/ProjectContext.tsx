@@ -6,7 +6,7 @@ import { ProjectsProvider } from "./ProjectsContext";
 import { SprintsProvider } from "./SprintsContext";
 import { TasksProvider } from "./TasksContext";
 import { BurndownProvider, useBurndown } from "./BurndownContext";
-import { useProjects } from "./ProjectsContext";
+import { useProjects as useProjectsFromContext } from "./ProjectsContext";
 import { useSprints } from "./SprintsContext";
 import { useTasks } from "./TasksContext";
 
@@ -80,7 +80,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Create a component that will provide the combined context
   const CombinedProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     // Get all context values from individual providers
-    const projectsContext = useProjects();
+    const projectsContext = useProjectsFromContext();
     const sprintsContext = useSprints();
     const tasksContext = useTasks();
     const burndownContext = useBurndown();
